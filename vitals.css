@@ -1,0 +1,196 @@
+/*!
+ * vitals.css — KPI/BIダッシュボード特化の軽量演出ライブラリ
+ * 依存ゼロ・単一ファイル・監査5分で終わる分量、を売りにする。
+ * https://github.com/ (公開時にURLを追加)
+ */
+
+@property --vt-pct {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+:root {
+  --vt-up: #22c55e;
+  --vt-down: #ef4444;
+  --vt-warn: #f59e0b;
+  --vt-accent: #6366f1;
+  --vt-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --vt-dur: 900ms;
+}
+
+/* ---------- 1. カウンター(数値アニメ) ---------- */
+.vt-counter {
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s;
+}
+.vt-counter.is-updating {
+  animation: vt-pulse-glow 0.6s var(--vt-ease);
+}
+@keyframes vt-pulse-glow {
+  0% { text-shadow: 0 0 0 rgba(99, 102, 241, 0); }
+  30% { text-shadow: 0 0 12px rgba(99, 102, 241, 0.6); }
+  100% { text-shadow: 0 0 0 rgba(99, 102, 241, 0); }
+}
+
+/* ---------- 2. ゲージ/ドーナツ進捗 ---------- */
+.vt-gauge {
+  --vt-pct: 0;
+  --vt-color: var(--vt-accent);
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(
+    var(--vt-color) calc(var(--vt-pct) * 1%),
+    rgba(127, 127, 127, 0.15) 0
+  );
+  transition: --vt-pct 1.2s var(--vt-ease);
+  position: relative;
+}
+.vt-gauge::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: var(--vt-gauge-bg, #10121a);
+}
+.vt-gauge-label {
+  position: relative;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* ---------- 3. 棒グラフ生成アニメ ---------- */
+.vt-bar-grow {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 100%;
+}
+.vt-bar-grow > .vt-bar {
+  transform-origin: bottom;
+  transform: scaleY(0);
+  animation: vt-grow-y var(--vt-dur) var(--vt-ease) forwards;
+  animation-delay: calc(var(--i, 0) * 80ms);
+  border-radius: 4px 4px 0 0;
+  flex: 1;
+}
+@keyframes vt-grow-y {
+  to { transform: scaleY(1); }
+}
+
+/* ---------- 4. スパークライン描画 ---------- */
+.vt-sparkline path {
+  stroke-dasharray: var(--vt-len, 300);
+  stroke-dashoffset: var(--vt-len, 300);
+  animation: vt-draw 1.4s var(--vt-ease) forwards;
+}
+@keyframes vt-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ---------- 5. トレンド矢印 ---------- */
+.vt-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.vt-trend.up { color: var(--vt-up); }
+.vt-trend.down { color: var(--vt-down); }
+.vt-trend svg {
+  width: 1em;
+  height: 1em;
+  animation: vt-bounce 1.6s ease-in-out infinite;
+}
+.vt-trend.down svg { animation-name: vt-bounce-down; }
+@keyframes vt-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes vt-bounce-down {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+/* ---------- 6. しきい値アラートリング ---------- */
+.vt-alert {
+  position: relative;
+}
+.vt-alert::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid var(--vt-warn);
+  animation: vt-ring 1.6s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes vt-ring {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.12); }
+}
+
+/* ---------- 7. カード群の段階表示 ---------- */
+[data-vt-stagger] > * {
+  opacity: 0;
+  transform: translateY(14px);
+}
+[data-vt-stagger].is-visible > * {
+  animation: vt-fade-up 0.6s var(--vt-ease) forwards;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+@keyframes vt-fade-up {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- 8. ヒートマップセルの更新パルス ---------- */
+.vt-heat-cell {
+  transition: background-color 0.4s;
+  position: relative;
+}
+.vt-heat-cell.is-updated {
+  animation: vt-ripple 0.9s ease-out;
+}
+@keyframes vt-ripple {
+  0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.5); }
+  100% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+}
+
+/* ---------- 9. ランキング並び替え(FLIP) ---------- */
+.vt-rank-row {
+  transition: transform 0.5s var(--vt-ease);
+}
+
+/* ---------- 10. ライブ更新ドット ---------- */
+.vt-live-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vt-up);
+}
+.vt-live-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  animation: vt-live-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes vt-live-ping {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vt-counter, .vt-gauge, .vt-bar-grow > .vt-bar, .vt-sparkline path,
+  .vt-trend svg, .vt-alert::after, [data-vt-stagger].is-visible > *,
+  .vt-heat-cell.is-updated, .vt-rank-row, .vt-live-dot::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
