@@ -1,0 +1,105 @@
+/*!
+ * meow-patch.css — Meow Patchブランド専用のミニコンポーネント集
+ * 猫ミーム文化(loaf座り/威嚇ポーズ/香箱で爆睡/Impact風ミームキャプション/Cat Tax)を
+ * CSSだけで再現する。vitals.cssと同じ思想: 依存ゼロ・単一ファイルで完結。
+ */
+
+:root {
+  --mp-bg: #1b1626;
+  --mp-panel: #241d33;
+  --mp-line: #362b4a;
+  --mp-pink: #ff8fc0;
+  --mp-violet: #9b7bff;
+  --mp-green: #7ee787;
+  --mp-yellow: #ffd479;
+  --mp-red: #ff8fa0;
+  --mp-ink: #eee7fb;
+  --mp-sub: #9d94b8;
+}
+
+/* ============ 1. Mood Status ============
+   よくある緑/赤の丸ドットの代わりに、猫の「体勢」でシステム状態を表す。
+   data-mood="loaf"(通常稼働・香箱座り) / "alert"(障害・威嚇の弓なり) / "sleep"(メンテナンス中・爆睡)
+   使い方: <span class="meow-status" data-mood="loaf">...(3つのpose SVGを内包)...<span class="label">OPERATIONAL</span></span>
+*/
+.meow-status { display: inline-flex; align-items: center; gap: 8px; }
+.meow-status svg { width: 24px; height: 24px; overflow: visible; color: var(--mp-sub); }
+.meow-status .label { font-size: 11px; letter-spacing: 0.05em; font-weight: 700; }
+
+.meow-status .pose { display: none; fill: currentColor; }
+.meow-status[data-mood="loaf"] svg { color: var(--mp-green); }
+.meow-status[data-mood="loaf"] .label { color: var(--mp-green); }
+.meow-status[data-mood="loaf"] .pose-loaf { display: block; animation: mp-breathe 3s ease-in-out infinite; }
+
+.meow-status[data-mood="alert"] svg { color: var(--mp-red); }
+.meow-status[data-mood="alert"] .label { color: var(--mp-red); }
+.meow-status[data-mood="alert"] .pose-alert { display: block; animation: mp-hiss .35s ease-in-out infinite; }
+
+.meow-status[data-mood="sleep"] svg { color: var(--mp-sub); }
+.meow-status[data-mood="sleep"] .label { color: var(--mp-sub); }
+.meow-status[data-mood="sleep"] .pose-sleep { display: block; }
+.meow-status[data-mood="sleep"] .zzz { animation: mp-float 2.2s ease-in-out infinite; }
+.meow-status[data-mood="sleep"] .zzz:nth-child(2) { animation-delay: .5s; }
+
+@keyframes mp-breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.06); } }
+@keyframes mp-hiss { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-1px) rotate(-2deg); } 75% { transform: translateX(1px) rotate(2deg); } }
+@keyframes mp-float { 0% { opacity: 0; transform: translateY(0); } 35% { opacity: 1; } 100% { opacity: 0; transform: translateY(-9px); } }
+
+/* ============ 2. Meme Caption ============
+   Impact書体風(白文字+黒縁)のミームキャプション。定番の「上下白文字」ノリを再現。
+   .mock を付けると sPoNgEbOb 風のあざけり交互大文字(テキスト側でaltCase()を通す想定)。
+*/
+.meow-caption {
+  font-weight: 900;
+  color: #fff;
+  -webkit-text-stroke: 1.6px #000;
+  paint-order: stroke fill;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  font-size: 20px;
+  margin: 0;
+}
+.meow-caption.mock { text-transform: none; }
+
+/* ============ 3. Paw Swipe ============
+   猫が机の上のものを払い落とすあの動き。要素の隅を肉球が横切っていく。
+   使い方: 任意のposition:relativeなコンテナに class="meow-pawswipe" を付与。
+*/
+.meow-pawswipe { position: relative; overflow: hidden; }
+.meow-pawswipe::after {
+  content: '🐾';
+  position: absolute; left: -24px; bottom: 14px;
+  font-size: 15px; opacity: 0;
+  animation: mp-paw-swipe 7s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes mp-paw-swipe {
+  0%   { opacity: 0; transform: translate(0, 0) rotate(-10deg); }
+  6%   { opacity: .55; }
+  22%  { opacity: .55; transform: translate(160px, -14px) rotate(12deg); }
+  28%  { opacity: 0; transform: translate(180px, -18px) rotate(16deg); }
+  100% { opacity: 0; }
+}
+
+/* ============ 4. Cat Tax badge ============
+   「何かを見せるなら猫の写真を見せろ」というミーム(Cat Tax)を、認証バッジ風に。
+   使い方: position:relativeな要素の中に <span class="meow-tax">CAT TAX PAID</span>
+*/
+.meow-tax {
+  position: absolute; top: -9px; right: 16px;
+  background: var(--mp-pink); color: var(--mp-bg);
+  font-weight: 700; font-size: 10px; letter-spacing: 0.04em;
+  padding: 4px 10px; border-radius: 4px;
+  transform: rotate(-3deg);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meow-status .pose-loaf,
+  .meow-status .pose-alert,
+  .meow-pawswipe::after,
+  .meow-status .zzz { animation: none !important; }
+}
