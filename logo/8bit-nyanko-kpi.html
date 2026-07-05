@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8BIT NYANKO — Score Board</title>
+<link rel="stylesheet" href="../vitals.css">
+<link rel="stylesheet" href="../nyanko-8bit.css">
+<style>
+  color-scheme: dark;
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 4px),
+      linear-gradient(180deg, var(--nk-bg2) 0%, var(--nk-bg) 60%);
+    color: var(--nk-white);
+    font-family: -apple-system, BlinkMacSystemFont, monospace;
+    padding: 32px clamp(16px,4vw,40px) 60px;
+  }
+
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom: 22px; flex-wrap:wrap; gap:10px; }
+  .brand { font-family:'Press2P'; font-size: 14px; color: var(--nk-cyan); }
+  .brand .n2 { color: var(--nk-pink); }
+
+  h1 { font-family:'Press2P'; font-size: 0.85rem; margin: 0 0 8px; letter-spacing: 0.04em; line-height:1.6; }
+  .sub { color: var(--nk-sub); margin-bottom: 26px; font-size: 0.82rem; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--nk-panel); border: 2px solid var(--nk-line); border-radius: 4px;
+    padding: 18px 20px;
+  }
+  .card h2 {
+    font-family:'Press2P'; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--nk-sub); margin: 0 0 14px; display:flex; align-items:center; gap:8px;
+  }
+  .big-number { font-family:'Press2P'; font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+  .vt-gauge { --vt-gauge-bg: var(--nk-panel); margin: 0 auto; --vt-accent: var(--nk-cyan); }
+  .vt-gauge-label { font-family:'Press2P'; font-size: 0.9rem; }
+  .bars-wrap { height: 90px; }
+  .vt-bar { background: var(--nk-pink); }
+  .vt-trend.up { color: var(--nk-cyan); }
+  .vt-trend.down { color: #ff4d6d; }
+
+  .rank-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .rank-row { display:flex; justify-content:space-between; padding:8px 10px; background: var(--nk-bg2); border-radius:2px; font-size: 0.82rem; }
+  .rank-row .val { font-family:'Press2P'; font-size:0.72rem; color: var(--nk-yellow); }
+
+  .lives-caption { font-size: 0.75rem; color: var(--nk-sub); margin-top: 10px; }
+
+  .replay-btn { margin-top: 26px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">8BIT <span class="n2">NYANKO</span></div>
+  <span class="pixel-lives" data-hp="3" id="topLives"></span>
+</div>
+
+<h1>WEEKLY SCORE BOARD</h1>
+<p class="sub">8BIT NYANKOのテイストで組んだKPIダッシュボードのスタイルスタディ。vitals.cssの演出はそのまま、配色とフォント・コンポーネントだけ差し替えている。</p>
+
+<div class="grid" data-vt-stagger>
+
+  <div class="card">
+    <h2><span class="vt-live-dot" style="background:var(--nk-cyan)"></span> 1UP SCORE</h2>
+    <div class="big-number vt-counter" id="counter1">0</div>
+    <div class="vt-trend up">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 15l7-7 7 7"/></svg>
+      前週比 +12.4%
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>POWER LEVEL</h2>
+    <div class="vt-gauge" id="gauge1">
+      <span class="vt-gauge-label" id="gaugeLabel1">0%</span>
+    </div>
+  </div>
+
+  <div class="card vt-alert" style="--vt-warn: #ff4d6d;">
+    <h2>LIVES REMAINING</h2>
+    <span class="pixel-lives" data-hp="1" id="cardLives"></span>
+    <div class="lives-caption">▼ 残機わずか。閾値(1機)を下回っています</div>
+  </div>
+
+  <div class="card">
+    <h2>COMBO STREAK(WEEKLY)</h2>
+    <div class="bars-wrap vt-bar-grow">
+      <div class="vt-bar" style="--i:0; height:40%"></div>
+      <div class="vt-bar" style="--i:1; height:65%"></div>
+      <div class="vt-bar" style="--i:2; height:50%"></div>
+      <div class="vt-bar" style="--i:3; height:82%"></div>
+      <div class="vt-bar" style="--i:4; height:96%"></div>
+      <div class="vt-bar" style="--i:5; height:74%"></div>
+      <div class="vt-bar" style="--i:6; height:88%"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>HIGH SCORE TREND</h2>
+    <svg class="vt-sparkline" viewBox="0 0 200 60" width="100%" height="70">
+      <path d="M0,45 L20,40 L40,42 L60,30 L80,35 L100,20 L120,25 L140,15 L160,18 L180,8 L200,10"
+            fill="none" stroke="var(--nk-cyan)" stroke-width="3" id="sparkPath"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>LEADERBOARD</h2>
+    <ul class="rank-list" id="rankList">
+      <li class="rank-row vt-rank-row" data-id="a"><span>🐾 もち</span><span class="val">9820</span></li>
+      <li class="rank-row vt-rank-row" data-id="b"><span>🐾 きなこ</span><span class="val">8760</span></li>
+      <li class="rank-row vt-rank-row" data-id="c"><span>🐾 むぎ</span><span class="val">7690</span></li>
+    </ul>
+  </div>
+
+</div>
+
+<button class="replay-btn pixel-btn" id="replayBtn">▲ REPLAY ▲</button>
+
+<script src="../vitals.js"></script>
+<script>
+  function renderLivesInto(el, count) {
+    const heartPattern = ["0110011","1111111","1111111","0111110","0011100","0001000"];
+    el.innerHTML = '';
+    for (let h=0; h<3; h++){
+      const hg = document.createElement('div');
+      hg.className='heart-grid';
+      heartPattern.forEach(row=>{
+        [...row].forEach(c=>{
+          const i = document.createElement('i');
+          if (c==='1' && h < count) i.classList.add('on');
+          hg.appendChild(i);
+        });
+      });
+      el.appendChild(hg);
+    }
+  }
+  renderLivesInto(document.getElementById('topLives'), 3);
+  renderLivesInto(document.getElementById('cardLives'), 1);
+
+  function playAll() {
+    Vitals.animateCounter(document.getElementById('counter1'), {
+      to: 84600, duration: 1400, format: (n) => Math.round(n).toLocaleString()
+    });
+
+    const gauge = document.getElementById('gauge1');
+    const label = document.getElementById('gaugeLabel1');
+    Vitals.setGauge(gauge, 0);
+    requestAnimationFrame(() => Vitals.setGauge(gauge, 94));
+    Vitals.animateCounter(label, { to: 94, duration: 1200, format: (n) => Math.round(n) + '%' });
+
+    Vitals.drawSparkline(document.getElementById('sparkPath'));
+
+    document.querySelectorAll('.vt-bar').forEach((b) => {
+      b.style.animation = 'none';
+      void b.offsetWidth;
+      b.style.animation = '';
+    });
+
+    const stagger = document.querySelector('[data-vt-stagger]');
+    stagger.classList.remove('is-visible');
+    void stagger.offsetWidth;
+    [...stagger.children].forEach((child, i) => child.style.setProperty('--i', i));
+    stagger.classList.add('is-visible');
+  }
+
+  Vitals.initStagger();
+  window.addEventListener('load', () => setTimeout(playAll, 150));
+  document.getElementById('replayBtn').addEventListener('click', playAll);
+
+  let rankData = [
+    { id: 'a', name: 'もち', score: 9820 },
+    { id: 'b', name: 'きなこ', score: 8760 },
+    { id: 'c', name: 'むぎ', score: 7690 },
+  ];
+  setInterval(() => {
+    rankData = rankData.map((r) => ({ ...r, score: Math.max(5000, r.score + Math.floor((Math.random()-0.4)*600)) }));
+    rankData.sort((a, b) => b.score - a.score);
+    const list = document.getElementById('rankList');
+    const rows = [...list.children];
+    Vitals.flipReorder(rows, () => {
+      rankData.forEach((r) => {
+        const row = rows.find((el) => el.dataset.id === r.id);
+        row.querySelector('span.val').textContent = r.score.toLocaleString();
+        list.appendChild(row);
+      });
+    });
+  }, 4000);
+</script>
+</body>
+</html>
