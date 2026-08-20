@@ -83,12 +83,6 @@ vitals-css/
 - アイコンは [Lucide](https://lucide.dev)(ISC License)を使用。
 - フォントは Google Fonts(すべてOFLライセンス)からサブセット取得して同梱。
 
-## 今後
-
-- npmパッケージ化はスター・反応を見てから判断する(いきなりフレームワーク化しない)。
-- 個別のエフェクトをX/Redditに投稿し、反応があったものだけ拡張する。
-- 反応が薄ければ、社内実績・ポートフォリオ素材として活用する方向に切り替える。
-
 ## License
 
 MIT License. 詳細は [`LICENSE`](LICENSE) を参照。
